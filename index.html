@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101820">
+  <title>F1 e o Planeta | Quiz</title>
+  <style>
+    :root {
+      --bg: #101820; --panel: #192630; --panel2: #223541;
+      --red: #e10600; --yellow: #ffd447; --text: #f5f7f8;
+      --muted: #b8c5cc; --green: #43c985; --border: #3a4b55;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; padding: 22px;
+      font-family: Arial, Helvetica, sans-serif; color: var(--text);
+      background: radial-gradient(circle at top right, #293d49 0, var(--bg) 48%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .app { width: min(100%, 760px); }
+    header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; }
+    .brand { display:flex; align-items:center; gap:10px; font-weight:900; letter-spacing:1px; }
+    .flag { width:35px; height:25px; background:repeating-linear-gradient(90deg,#fff 0 6px,#111 6px 12px); transform:skew(-12deg); border-left:5px solid var(--red); }
+    .tag { color:var(--yellow); font-size:.75rem; font-weight:bold; letter-spacing:1.5px; }
+    .card { background:rgba(25,38,48,.97); border:1px solid var(--border); border-radius:22px; padding:clamp(22px,5vw,42px); box-shadow:0 18px 55px #0005; }
+    .hero { text-align:center; }
+    .hero .car { font-size:3.5rem; margin:6px 0 12px; }
+    h1 { font-size:clamp(2rem,6vw,3.2rem); line-height:1.05; margin:8px 0 14px; }
+    h1 span { color:var(--red); }
+    p { color:var(--muted); line-height:1.6; }
+    .hero p { max-width:550px; margin:0 auto 24px; }
+    button { font:inherit; cursor:pointer; }
+    .primary { border:0; border-radius:12px; padding:15px 25px; background:var(--red); color:white; font-weight:800; transition:.18s; }
+    .primary:hover { background:#ff3029; transform:translateY(-2px); }
+    .small-note { font-size:.83rem; margin-top:20px; }
+    .topline { display:flex; justify-content:space-between; gap:12px; align-items:center; color:var(--muted); font-size:.9rem; font-weight:bold; }
+    .progress { height:9px; border-radius:20px; background:#344650; overflow:hidden; margin:13px 0 28px; }
+    .progress > div { height:100%; width:0; background:linear-gradient(90deg,var(--red),#ff665e); transition:width .3s; }
+    .question-number { color:var(--yellow); font-size:.78rem; font-weight:900; letter-spacing:1.5px; }
+    h2 { font-size:clamp(1.35rem,4vw,1.9rem); line-height:1.3; margin:10px 0 22px; }
+    .answers { display:grid; gap:11px; }
+    .answer { width:100%; text-align:left; color:var(--text); background:var(--panel2); border:2px solid transparent; border-radius:12px; padding:15px 16px; line-height:1.4; }
+    .answer:hover:not(:disabled) { border-color:var(--yellow); }
+    .answer:disabled { cursor:default; opacity:1; }
+    .answer.correct { border-color:var(--green); background:#164332; }
+    .answer.wrong { border-color:#ff6b64; background:#542a2a; }
+    .feedback { margin-top:18px; border-radius:12px; padding:15px; background:#263945; color:var(--muted); line-height:1.5; }
+    .feedback strong { color:var(--text); display:block; margin-bottom:4px; }
+    .next-wrap { display:flex; justify-content:flex-end; margin-top:18px; }
+    .hidden { display:none !important; }
+    .result { text-align:center; }
+    .score { font-size:4rem; color:var(--yellow); font-weight:900; margin:12px 0; }
+    .result h2 { margin-bottom:8px; }
+    .result p { max-width:540px; margin:10px auto 22px; }
+    .pill { display:inline-block; border:1px solid var(--border); border-radius:30px; padding:7px 12px; color:var(--muted); font-size:.82rem; margin:4px; }
+    .fact { text-align:left; margin:24px 0; padding:17px; border-left:4px solid var(--yellow); background:#223541; border-radius:8px; }
+    footer { text-align:center; color:#8799a3; font-size:.75rem; padding:16px 8px 0; }
+    @media (max-width:480px) { body { padding:12px; } .card { border-radius:16px; } header { margin-bottom:12px; } }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="brand"><span class="flag"></span><span>F1 <span style="color:var(--red)">+</span> PLANETA</span></div>
+      <div class="tag">QUIZ • 7º ANO</div>
+    </header>
+
+    <section class="card hero" id="start-screen">
+      <div class="car" aria-hidden="true">🏎️</div>
+      <div class="tag">DESAFIO AMBIENTAL</div>
+      <h1>Velocidade<br><span>ou sustentabilidade?</span></h1>
+      <p>A Fórmula 1 é cheia de velocidade e tecnologia. Mas você já pensou em quanto carbono é emitido para fazer uma temporada acontecer? Responda às 10 perguntas e descubra!</p>
+      <div><span class="pill">10 perguntas</span><span class="pill">Múltipla escolha</span><span class="pill">Aprenda jogando</span></div>
+      <br>
+      <button class="primary" id="start-btn">COMEÇAR O QUIZ</button>
+      <p class="small-note">Leia com atenção. Cada pergunta tem apenas uma resposta correta.</p>
+    </section>
+
+    <section class="card hidden" id="quiz-screen" aria-live="polite">
+      <div class="topline"><span id="counter">PERGUNTA 1 DE 10</span><span id="score-live">Pontos: 0</span></div>
+      <div class="progress"><div id="progress-bar"></div></div>
+      <div class="question-number" id="question-label">QUESTÃO 01</div>
+      <h2 id="question-text"></h2>
+      <div class="answers" id="answers"></div>
+      <div class="feedback hidden" id="feedback"></div>
+      <div class="next-wrap"><button class="primary hidden" id="next-btn">PRÓXIMA PERGUNTA</button></div>
+    </section>
+
+    <section class="card result hidden" id="result-screen">
+      <div class="tag">FIM DE CORRIDA</div>
+      <div class="car">🏁</div>
+      <h2 id="result-title">Muito bem!</h2>
+      <div class="score" id="final-score">0/10</div>
+      <p id="result-message"></p>
+      <div class="fact"><strong>Você sabia?</strong>A emissão de carbono da Fórmula 1 não vem só dos carros durante as corridas. Viagens de equipes e fãs, transporte de equipamentos, fábricas e outras atividades também fazem parte do impacto ambiental.</div>
+      <button class="primary" id="restart-btn">JOGAR NOVAMENTE</button>
+    </section>
+    <footer>Projeto de feira cultural • Fórmula 1 e emissão de carbono</footer>
+  </main>
+
+<script>
+const questions = [
+  {
+    q: "1. O que significa emissão de carbono?",
+    a: ["A liberação de gases que contribuem para o aquecimento global", "A quantidade de combustível que cabe no tanque", "A fumaça colorida dos pneus"],
+    c: 0,
+    e: "Emissão de carbono é uma forma de falar da liberação de dióxido de carbono (CO₂) e de outros gases de efeito estufa na atmosfera."
+  },
+  {
+    q: "2. Qual destas atividades também gera emissões na Fórmula 1, além dos carros na pista?",
+    a: ["O transporte de carros, peças e equipamentos", "A pintura dos troféus apenas", "A contagem das voltas"],
+    c: 0,
+    e: "Equipamentos viajam pelo mundo para acompanhar as corridas. Aviões, navios e caminhões podem gerar muitas emissões."
+  },
+  {
+    q: "3. Por que a Fórmula 1 viaja tanto durante uma temporada?",
+    a: ["Para realizar corridas em diferentes países", "Para testar os semáforos das cidades", "Porque os carros não podem ficar parados"],
+    c: 0,
+    e: "As etapas acontecem em vários países. Por isso, equipes, pilotos, equipamentos e materiais precisam se deslocar."
+  },
+  {
+    q: "4. Qual opção pode ajudar a diminuir as emissões nas viagens da categoria?",
+    a: ["Planejar melhor o transporte e usar meios mais eficientes", "Fazer mais viagens sem necessidade", "Levar todas as peças em aviões separados"],
+    c: 0,
+    e: "Organizar melhor a logística, evitar deslocamentos desnecessários e escolher transportes mais eficientes pode reduzir o impacto."
+  },
+  {
+    q: "5. O que é o efeito estufa?",
+    a: ["Um fenômeno natural em que gases da atmosfera retêm parte do calor", "Uma camada de fumaça que fica só nos autódromos", "O calor produzido pelos motores dos carros"],
+    c: 0,
+    e: "O efeito estufa é natural e importante para a vida. O problema é seu aumento por causa do excesso de gases, que intensifica o aquecimento do planeta."
+  },
+  {
+    q: "6. Por que não basta olhar apenas para a fumaça que sai dos carros de F1?",
+    a: ["Porque a categoria também emite carbono em viagens, fábricas e transportes", "Porque os carros não usam energia", "Porque as corridas não têm impacto ambiental"],
+    c: 0,
+    e: "O impacto ambiental de um esporte mundial envolve várias etapas, desde fabricar peças até transportar tudo para os eventos."
+  },
+  {
+    q: "7. Qual atitude dos fãs pode ajudar o meio ambiente em um dia de corrida?",
+    a: ["Usar transporte coletivo ou dividir carona quando possível", "Jogar lixo nas arquibancadas", "Ir sozinho de carro mesmo havendo outras opções"],
+    c: 0,
+    e: "Quando muitas pessoas escolhem transporte coletivo, bicicleta ou carona, o impacto do deslocamento pode diminuir."
+  },
+  {
+    q: "8. O que são combustíveis sustentáveis?",
+    a: ["Combustíveis produzidos de forma a tentar reduzir o impacto ambiental", "Combustíveis que nunca precisam ser fabricados", "Combustíveis que fazem o carro não gastar energia"],
+    c: 0,
+    e: "Eles podem ser produzidos por diferentes processos e matérias-primas. O impacto depende de como são feitos e usados."
+  },
+  {
+    q: "9. Qual destas frases é a mais correta sobre a Fórmula 1 e o meio ambiente?",
+    a: ["A tecnologia do automobilismo pode ajudar a pesquisar soluções, mas ainda existem impactos", "A Fórmula 1 não emite nenhum gás", "Só existe emissão de carbono quando um carro bate"],
+    c: 0,
+    e: "A categoria pode desenvolver e testar tecnologias, mas isso não significa que seu impacto ambiental já tenha desaparecido."
+  },
+  {
+    q: "10. Qual é uma boa ideia para tornar uma temporada de F1 mais sustentável?",
+    a: ["Reduzir emissões em viagens, operações e energia, além de medir os resultados", "Aumentar o número de voos sem planejamento", "Ignorar o consumo de energia das equipes"],
+    c: 0,
+    e: "Para melhorar, é importante medir de onde vêm as emissões e criar ações para reduzi-las em várias partes da operação."
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+let currentCorrectIndex = 0;
+
+const startScreen = document.getElementById("start-screen");
+const quizScreen = document.getElementById("quiz-screen");
+const resultScreen = document.getElementById("result-screen");
+const answersEl = document.getElementById("answers");
+const feedbackEl = document.getElementById("feedback");
+const nextBtn = document.getElementById("next-btn");
+
+document.getElementById("start-btn").addEventListener("click", () => {
+  current = 0; score = 0;
+  startScreen.classList.add("hidden");
+  resultScreen.classList.add("hidden");
+  quizScreen.classList.remove("hidden");
+  showQuestion();
+});
+
+function showQuestion() {
+  answered = false;
+  const item = questions[current];
+  document.getElementById("counter").textContent = `PERGUNTA ${current + 1} DE ${questions.length}`;
+  document.getElementById("score-live").textContent = `Pontos: ${score}`;
+  document.getElementById("progress-bar").style.width = `${(current / questions.length) * 100}%`;
+  document.getElementById("question-label").textContent = `QUESTÃO ${String(current + 1).padStart(2, "0")}`;
+  document.getElementById("question-text").textContent = item.q;
+  answersEl.innerHTML = "";
+  feedbackEl.classList.add("hidden");
+  nextBtn.classList.add("hidden");
+  const options = item.a.map((text, originalIndex) => ({ text, originalIndex }));
+  for (let i = options.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [options[i], options[j]] = [options[j], options[i]];
+  }
+  currentCorrectIndex = options.findIndex(option => option.originalIndex === item.c);
+  options.forEach((option, index) => {
+    const btn = document.createElement("button");
+    btn.className = "answer";
+    btn.textContent = `${String.fromCharCode(65 + index)}) ${option.text}`;
+    btn.addEventListener("click", () => chooseAnswer(index));
+    answersEl.appendChild(btn);
+  });
+}
+
+function chooseAnswer(index) {
+  if (answered) return;
+  answered = true;
+  const item = questions[current];
+  const buttons = [...answersEl.querySelectorAll("button")];
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === currentCorrectIndex) btn.classList.add("correct");
+    if (i === index && index !== currentCorrectIndex) btn.classList.add("wrong");
+  });
+  const isCorrect = index === currentCorrectIndex;
+  if (isCorrect) score++;
+  feedbackEl.innerHTML = `<strong>${isCorrect ? "Resposta correta!" : "Não foi dessa vez!"}</strong>${item.e}`;
+  feedbackEl.classList.remove("hidden");
+  document.getElementById("score-live").textContent = `Pontos: ${score}`;
+  nextBtn.textContent = current === questions.length - 1 ? "VER RESULTADO" : "PRÓXIMA PERGUNTA";
+  nextBtn.classList.remove("hidden");
+}
+
+nextBtn.addEventListener("click", () => {
+  current++;
+  if (current < questions.length) showQuestion();
+  else showResult();
+});
+
+function showResult() {
+  quizScreen.classList.add("hidden");
+  resultScreen.classList.remove("hidden");
+  document.getElementById("progress-bar").style.width = "100%";
+  document.getElementById("final-score").textContent = `${score}/10`;
+  let title, message;
+  if (score >= 9) {
+    title = "Pole position da sustentabilidade!";
+    message = "Excelente! Você mostrou que entende como o esporte pode buscar soluções para reduzir seu impacto ambiental.";
+  } else if (score >= 6) {
+    title = "Boa corrida!";
+    message = "Mandou bem! Você já sabe bastante sobre o assunto. Continue aprendendo e compartilhando essas ideias.";
+  } else {
+    title = "Treino concluído!";
+    message = "Toda corrida é uma chance de melhorar. Leia as explicações, tente novamente e descubra novas formas de cuidar do planeta.";
+  }
+  document.getElementById("result-title").textContent = title;
+  document.getElementById("result-message").textContent = message;
+}
+
+document.getElementById("restart-btn").addEventListener("click", () => {
+  resultScreen.classList.add("hidden");
+  startScreen.classList.remove("hidden");
+});
+</script>
+</body>
+</html>
